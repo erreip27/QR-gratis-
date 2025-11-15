@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de QR Fun Pro – Erreip</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Patua+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling/lib/qr-code-styling.js"></script>
+
+    <style>
+        /* Variables y Base: Rojo y Negro Profesional */
+:root {
+    --primary-color: #E91E63; /* Rojo Magenta/Rosa Fuerte (Menos chillón que el FF3366) */
+    --primary-dark: #C2185B; /* Tono más oscuro de Primary */
+    --secondary-color: #212121; /* Negro Oscuro */
+    --danger-color: #D32F2F; /* Rojo de error */
+    --background-light: #ECEFF1; /* Fondo gris muy suave/claro y frío */
+    --text-dark: #424242; /* Color de texto oscuro */
+    --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.1); 
+    --border-radius: 14px; 
+    
+    /* FUENTES */
+    --font-title: 'Patua One', cursive; 
+    --font-body: 'Poppins', sans-serif;
+    
+    /* Colores de Pestañas */
+    --tab-inactive: #B0BEC5;
+    --tab-active-bg: white;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--background-light);
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 900px; 
+    width: 100%;
+    background: white;
+    padding: 0; 
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    display: grid;
+    grid-template-columns: 1fr 380px; /* Layout principal: Controles | Previsualización */
+}
+
+.controls-area {
+    padding: 30px;
+}
+
+.preview-area {
+    background-color: #FAFAFA;
+    border-left: 1px solid #EEEEEE;
+    padding: 30px;
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+/* ESTILOS DE FUENTE */
+h2 {
+    font-family: var(--font-title); 
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--secondary-color); 
+    font-size: 2.2em; 
+    border-bottom: 4px solid var(--primary-color);
+    padding-bottom: 5px;
+    display: inline-block;
+    width: 100%;
+}
+
+.control-section legend {
+    font-family: var(--font-title); 
+    font-size: 1.4em;
+    font-weight: 400; 
+    color: var(--primary-dark); 
+    padding: 0 10px;
+}
+
+/* TABS (Pestañas) */
+.tab-controls {
+    display: flex;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #EEEEEE;
+    overflow-x: auto;
+}
+
+.tab-button {
+    padding: 12px 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--tab-inactive);
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.tab-button.active {
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    background-color: var(--tab-active-bg);
+}
+
+.tab-content {
+    display: none;
+    padding-top: 10px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* CONTROLES GENERALES */
+label {
+    font-weight: 500;
+    margin-top: 15px;
+    display: block;
+    color: var(--text-dark); 
+    font-size: 0.95em;
+}
+
+/* SLIDER */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 5px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-color); 
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s, transform 0.2s;
+}
+
+input[type="range"]:focus {
+    outline: none; 
+    box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.2);
+}
+
+/* INPUTS Y SELECTS */
+input[type="text"], .color-input-container input[type="text"], select {
+    width: 100%;
+    padding: 10px 15px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: 1px solid #CFD8DC; 
+    box-sizing: border-box;
+    transition: all 0.3s;
+    font-size: 1em;
+    background-color: #fff;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23E91E63%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.6-6.4H19a17.6%2017.6%200%200%200-13.6%206.4%2017.6%2017.6%200%200%200%200%2023.2l128%20128c4.8%204.8%2010.8%207.2%2017.2%207.2s12.4-2.4%2017.2-7.2l128-128c4.8-4.8%204.8-12.8%200-17.6z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 12px top 50%;
+    background-size: 12px auto;
+    padding-right: 35px;
+}
+
+input:focus, select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(233, 30, 99, 0.2);
+    outline: none;
+    background-color: #FFF;
+}
+
+/* Fieldset para secciones */
+.control-section {
+    border: none;
+    padding: 0;
+    margin-bottom: 25px;
+}
+
+.control-section legend {
+    margin-bottom: 10px;
+    border-bottom: 2px dashed #CFD8DC;
+    padding-bottom: 5px;
+    width: 100%;
+}
+
+/* CONTROLES DE COLOR */
+.color-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.color-group input[type="color"] {
+    width: 45px;
+    min-width: 45px;
+    height: 45px;
+    padding: 0;
+    border: 1px solid #CFD8DC;
+    border-radius: 8px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: transparent;
+    overflow: hidden;
+}
+
+.color-input-container {
+    flex-grow: 1;
+}
+
+/* Botones Generales */
+button {
+    padding: 12px;
+    border: none;
+    border-radius: 8px; 
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: white;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+#remove-logo-btn {
+    background: var(--danger-color); 
+    box-shadow: 0 3px 8px rgba(211, 47, 47, 0.3);
+    font-size: 0.9em;
+    padding: 10px 15px;
+}
+
+#remove-logo-btn:hover {
+    background: #C62828;
+    transform: translateY(-1px);
+}
+
+#download-btn {
+    background: var(--primary-color); 
+    margin-top: 25px;
+    box-shadow: 0 5px 12px rgba(233, 30, 99, 0.4);
+    width: 100%; 
+}
+
+#download-btn:hover {
+    background: var(--primary-dark); 
+    transform: translateY(-2px);
+    box-shadow: 0 7px 15px rgba(233, 30, 99, 0.5);
+}
+
+/* Agrupación de Logo y Botón de Archivo ESTILIZADO */
+.logo-controls {
+    display: grid;
+    grid-template-columns: 1fr auto; 
+    gap: 10px;
+    align-items: center;
+    margin-top: 15px;
+}
+
+/* Estilo del botón de seleccionar archivo (LABEL) */
+#custom-file-label {
+    background: var(--secondary-color); 
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+#custom-file-label:hover {
+    background: #000000; 
+}
+
+#file-name-display {
+    display: block;
+    font-size: 0.8em;
+    color: var(--text-dark);
+    padding: 5px 0 0 5px; 
+    font-weight: 400;
+}
+
+.logo-controls .file-input-container {
+     display: flex;
+     flex-direction: column;
+}
+
+/* PREVISUALIZACIÓN DEL QR */
+#qr-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fcfcfc;
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    padding: 15px;
+    width: 320px;
+    height: 320px;
+}
+
+.qr-frame-container {
+    width: 300px; 
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease; 
+    overflow: hidden; 
+}
+
+/* SOLUCIÓN HACK: Estilos de Marcos CSS para el CONTENEDOR del QR */
+.frame-none { border: none; box-shadow: none; }
+.frame-basic { border: 4px solid var(--secondary-color); border-radius: 10px; box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15); }
+.frame-rounded { border: 8px solid var(--primary-color); border-radius: 30px; box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3); } 
+.frame-dotted { border: 4px dotted var(--primary-dark); border-radius: 5px; box-shadow: none; } 
+.frame-dashed-black { border: 3px dashed var(--secondary-color); border-radius: 8px; box-shadow: none; }
+.frame-double-red { border: 6px double var(--primary-color); border-radius: 15px; box-shadow: 0 5px 10px rgba(233, 30, 99, 0.2); }
+
+.control-group { margin-bottom: 15px; }
+
+/* ------------------------------------ */
+/* Estilos para el Mockup de Opciones   */
+/* ------------------------------------ */
+.style-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.style-option-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    border: 2px solid #CFD8DC;
+    padding: 10px 5px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background-color: #fff;
+}
+
+.style-option-item:hover {
+    border-color: #B0BEC5;
+}
+
+.style-option-item.selected {
+    border-color: var(--primary-color);
+    background-color: #F8BBD0; 
+    box-shadow: 0 0 5px rgba(233, 30, 99, 0.5);
+}
+
+.style-mockup {
+    width: 60px;
+    height: 60px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    align-items: center;
+    justify-items: center;
+    box-sizing: border-box;
+}
+
+.style-mockup-label {
+    font-size: 0.85em;
+    font-weight: 500;
+    text-align: center;
+    color: var(--text-dark);
+}
+
+/* Mockup de Puntos (Dots) */
+.dots-mockup .dot {
+    width: 12px;
+    height: 12px;
+    background-color: var(--primary-color);
+    margin: 1px;
+}
+.dots-mockup.square .dot { border-radius: 0; }
+.dots-mockup.dots .dot { border-radius: 50%; }
+.dots-mockup.rounded .dot { border-radius: 4px; }
+.dots-mockup.classy .dot { border-radius: 0; transform: rotate(45deg); }
+.dots-mockup.classy-rounded .dot { border-radius: 5px 0 5px 0; }
+.dots-mockup.extra-rounded .dot { border-radius: 6px; }
+
+/* Mockup de Ojos (Corners) - Simplificado */
+.eye-mockup {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background-color: transparent;
+}
+
+.eye-square {
+    width: 40px;
+    height: 40px;
+    /* REFUERZO DE CONTORNO: Aumentamos el borde a 6px */
+    border: 6px solid var(--secondary-color); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    transition: all 0.2s; 
+}
+
+.eye-dot {
+    width: 14px;
+    height: 14px;
+    background-color: var(--primary-color);
+    transition: all 0.2s; 
+}
+
+/* Estilos de Contorno (Square Options) */
+.eye-mockup.square .eye-square { border-radius: 0; }
+.eye-mockup.extra-rounded .eye-square { border-radius: 8px; }
+.eye-mockup.dot .eye-square { border-radius: 50%; } 
+.eye-mockup.classy .eye-square { border-radius: 12px 0 12px 0; } /* Elegante */
+
+/* Estilos de Centro (Dot Options) */
+.eye-mockup .square .eye-dot { border-radius: 0; }
+.eye-mockup .dots .eye-dot { border-radius: 50%; }
+.eye-mockup .rounded .eye-dot { border-radius: 4px; }
+.eye-mockup .classy .eye-dot { border-radius: 1px; transform: rotate(45deg); }
+.eye-mockup .classy-rounded .eye-dot { border-radius: 5px 0 5px 0; }
+.eye-mockup .extra-rounded .eye-dot { border-radius: 6px; }
+
+
+/* Estilos de Marcos Mockup */
+.frame-mockup {
+    width: 60px;
+    height: 60px;
+    background: #fff;
+    box-shadow: none;
+    box-sizing: border-box;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.frame-mockup .qr-small-representation {
+    width: 70%;
+    height: 70%;
+    background: repeating-conic-gradient(var(--primary-color) 0% 25%, #fff 0% 50%) 50% / 8px 8px;
+    border-radius: 5px;
+}
+
+
+/* ESTILOS ESPECÍFICOS PARA EL CHECKBOX */
+#transparent-bg-checkbox, #gradient-dots-checkbox {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 20px; 
+    height: 20px; 
+    background-color: #fff;
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    margin-right: 10px;
+    transition: all 0.2s;
+}
+
+#transparent-bg-checkbox:checked, #gradient-dots-checkbox:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+#transparent-bg-checkbox:checked::after, #gradient-dots-checkbox:checked::after {
+    content: '\f00c'; 
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 14px;
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Deshabilitar inputs de color cuando gradiente o transparente está activo */
+.transparent-active input[type="color"], 
+.transparent-active input[type="text"] {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.transparent-active input[type="text"] {
+     background-color: #EEEEEE;
+}
+
+/* SOLUCIÓN HACK: Ocultar los ojos de la librería para forzar el estilo CSS */
+/* Los colores de ojos se pasan por JS como variables CSS */
+.qr-frame-container svg > g:nth-child(2) > path,
+.qr-frame-container svg > g:nth-child(3) > path,
+.qr-frame-container svg > g:nth-child(4) > path {
+    fill: var(--eye-square-color, #212121) !important; 
+    stroke: none !important; 
+}
+
+.qr-frame-container svg > g:nth-child(2) > circle,
+.qr-frame-container svg > g:nth-child(3) > circle,
+.qr-frame-container svg > g:nth-child(4) > circle {
+    fill: var(--eye-dot-color, #E91E63) !important;
+}
+
+
+/* ------------------------------------ */
+/* ESTILOS Y ANIMACIÓN DEL FOOTER       */
+/* ------------------------------------ */
+.main-footer {
+    width: 100%;
+    max-width: 900px; 
+    margin-top: 30px;
+    padding: 20px 0;
+    text-align: center;
+    color: #999; 
+    font-size: 0.85em;
+}
+
+.main-footer .creator-name {
+    font-weight: 600;
+    color: var(--primary-color); 
+    text-transform: uppercase;
+}
+
+/* ==================================== */
+/* !!! MEDIA QUERIES PARA MÓVILES !!!   */
+/* ==================================== */
+
+/* 1. LAYOUT TABLET/MÓVIL GRANDE (900px a 768px) */
+@media (max-width: 900px) {
+    .container { 
+        grid-template-columns: 1fr; /* Columna única */
+    }
+    
+    .preview-area {
+        border-left: none;
+        border-top: 1px solid #EEEEEE;
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        padding: 25px 15px;
+    }
+    
+    .controls-area {
+         padding: 20px;
+    }
+    
+    /* El QR sigue siendo grande para tablets */
+    #qr-preview {
+        width: 320px;
+        height: 320px;
+    }
+
+    .qr-frame-container { 
+        width: 300px; 
+        height: 300px; 
+    }
+    
+    .tab-controls {
+        margin-bottom: 15px;
+    }
+}
+
+/* 2. LAYOUT MÓVIL ESTÁNDAR (768px a 501px) */
+@media (max-width: 768px) {
+    /* Ajustes intermedios para mejor visualización */
+    .controls-area {
+        padding: 15px;
+    }
+    .style-options {
+        /* Fuerza a 3 columnas para que los mockups no sean demasiado grandes */
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 8px;
+    }
+    .tab-button {
+         padding: 10px 15px; 
+    }
+}
+
+/* 3. LAYOUT MÓVIL PEQUEÑO (500px y menos) */
+@media (max-width: 500px) {
+    body { padding: 15px 10px; }
+    h2 { font-size: 1.8em; }
+    
+    /* APILAR LOGO Y BOTÓN QUITAR */
+    .logo-controls { 
+        grid-template-columns: 1fr; 
+        gap: 15px; 
+    }
+    .logo-controls #remove-logo-btn { width: 100%; }
+    
+    /* MOCKUPS A 2 COLUMNAS para que no se vean demasiado apretados */
+    .style-options { 
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 5px;
+    }
+    .style-option-item { padding: 5px; }
+    
+    /* HACER EL QR ADAPTABLE Y CUADRADO */
+    #qr-preview {
+        width: 100%; /* Ocupa el 100% del contenedor */
+        max-width: 300px; /* Máximo 300px */
+        height: auto; 
+        padding: 10px;
+    }
+    .qr-frame-container { 
+        width: 100%; /* Ocupa el 100% del #qr-preview */
+        height: 0;
+        padding-bottom: 100%; /* Truco para ratio 1:1 */
+        max-width: 280px;
+        max-height: 280px;
+    }
+    
+    /* Reducir aún más el tamaño de los mockups */
+    .style-mockup, .eye-mockup, .frame-mockup { 
+        width: 40px; 
+        height: 40px; 
+    }
+    .eye-square { width: 25px; height: 25px; border-width: 3px; }
+    .eye-dot { width: 8px; height: 8px; }
+    .style-mockup-label { font-size: 0.65em; }
+    .tab-button { padding: 10px 8px; font-size: 0.85em; }
+    .tab-controls {
+        /* Aseguramos el scroll si los nombres de las pestañas son largos */
+        overflow-x: scroll;
+        justify-content: flex-start;
+    }
+}
+
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="controls-area">
+        <h2><i class="fas fa-qrcode"></i> Generador QR Pro</h2>
+        
+        <div class="tab-controls">
+            <button class="tab-button active" data-tab="content-logo"><i class="fas fa-file-alt"></i> Contenido & Logo</button>
+            <button class="tab-button" data-tab="colors-design"><i class="fas fa-palette"></i> Diseño & Color</button>
+            <button class="tab-button" data-tab="quality-frame"><i class="fas fa-cog"></i> Calidad & Marco</button>
+        </div>
+        
+        <div class="tab-content active" id="content-logo">
+            <fieldset class="control-section">
+                <legend>Contenido del Código</legend>
+                <div class="control-group">
+                    <label for="content-type">Tipo de Contenido:</label>
+                    <select id="content-type">
+                        <option value="url" selected>URL / Texto</option>
+                        <option value="wifi">Conexión Wi-Fi</option>
+                        <option value="vcard">Tarjeta de Contacto (vCard)</option>
+                    </select>
+                </div>
+                
+                <div id="content-url" class="content-group">
+                    <label for="qr-text">Contenido (Texto o enlace):</label>
+                    <input type="text" id="qr-text" placeholder="Escribe tu texto o link, ej: https://erreip.com" value="https://mi-enlace.com">
+                </div>
+
+                <div id="content-wifi" class="content-group" style="display: none;">
+                    <div class="control-group">
+                        <label for="wifi-ssid">Nombre de la Red (SSID):</label>
+                        <input type="text" id="wifi-ssid" placeholder="Ej: Red de mi casa">
+                    </div>
+                    <div class="control-group">
+                        <label for="wifi-password">Contraseña:</label>
+                        <input type="text" id="wifi-password" placeholder="Mínimo 8 caracteres">
+                    </div>
+                    <div class="control-group">
+                        <label for="wifi-type">Tipo de Cifrado:</label>
+                        <select id="wifi-type">
+                            <option value="WPA" selected>WPA/WPA2</option>
+                            <option value="WEP">WEP</option>
+                            <option value="nopass">Sin contraseña</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="content-vcard" class="content-group" style="display: none;">
+                    <div class="control-group">
+                        <label for="vcard-name">Nombre Completo:</label>
+                        <input type="text" id="vcard-name" placeholder="Ej: Jean Pierre Leniz">
+                    </div>
+                    <div class="control-group">
+                        <label for="vcard-phone">Teléfono:</label>
+                        <input type="text" id="vcard-phone" placeholder="Ej: +57 300 123 4567">
+                    </div>
+                    <div class="control-group">
+                        <label for="vcard-email">Email:</label>
+                        <input type="text" id="vcard-email" placeholder="Ej: jp.leniz@mail.com">
+                    </div>
+                </div>
+            </fieldset>
+            
+            <fieldset class="control-section">
+                <legend>Logo (Opcional)</legend>
+                <div class="logo-controls">
+                    <div class="file-input-container">
+                        <input type="file" id="qr-logo" accept="image/*" style="display: none;">
+                        <label for="qr-logo" id="custom-file-label"><i class="fas fa-upload"></i> Subir Logo</label>
+                        <span id="file-name-display">Ningún archivo seleccionado.</span>
+                    </div>
+                    <button id="remove-logo-btn"><i class="fas fa-times"></i> Quitar</button>
+                </div>
+            </fieldset>
+        </div>
+        
+        <div class="tab-content" id="colors-design">
+            
+            <fieldset class="control-section">
+                <legend>Forma de los Puntos Internos</legend>
+                <input type="hidden" id="qr-shape" value="classy">
+                <div class="style-options" id="dots-style-options"></div>
+            </fieldset>
+
+            <fieldset class="control-section">
+                <legend>Estilo de los Ojos (Patrones de Esquina)</legend>
+                <div class="control-group">
+                    <label for="qr-eyes-square">Forma del Contorno del Ojo:</label>
+                    <input type="hidden" id="qr-eyes-square" value="square">
+                    <div class="style-options" id="eyes-square-style-options"></div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="qr-eyes-dot">Forma del Centro del Ojo:</label>
+                    <input type="hidden" id="qr-eyes-dot" value="classy">
+                    <div class="style-options" id="eyes-dot-style-options"></div>
+                </div>
+            </fieldset>
+            
+            <fieldset class="control-section" id="color-section">
+                <legend>Colores</legend>
+                
+                <div class="control-group">
+                    <label style="display: flex; align-items: center; cursor: pointer; margin-top: 5px;">
+                        <input type="checkbox" id="gradient-dots-checkbox">
+                        Aplicar **Gradiente** a Puntos
+                    </label>
+                </div>
+                
+                <div class="control-group" id="gradient-type-group" style="display: none;">
+                    <label for="gradient-type">Tipo de Gradiente:</label>
+                    <select id="gradient-type">
+                        <option value="linear">Lineal</option>
+                        <option value="radial">Radial</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label id="qr-color-label">Color de Puntos (Inicio):</label>
+                    <div class="color-group">
+                        <input type="color" id="qr-color" value="#E91E63">
+                        <div class="color-input-container">
+                            <input type="text" id="qr-color-hex" value="#E91E63" maxlength="7">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group" id="qr-color-end-group" style="display: none;">
+                    <label>Color de Puntos (Fin):</label>
+                    <div class="color-group">
+                        <input type="color" id="qr-color-end" value="#212121">
+                        <div class="color-input-container">
+                            <input type="text" id="qr-color-end-hex" value="#212121" maxlength="7">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Color de Borde del Ojo:</label>
+                    <div class="color-group">
+                        <input type="color" id="qr-eyes-square-color" value="#212121"> <div class="color-input-container">
+                            <input type="text" id="qr-eyes-square-color-hex" value="#212121" maxlength="7">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Color de Centro del Ojo:</label>
+                    <div class="color-group">
+                        <input type="color" id="qr-eyes-dot-color" value="#E91E63"> <div class="color-input-container">
+                            <input type="text" id="qr-eyes-dot-color-hex" value="#E91E63" maxlength="7">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Color de Fondo:</label>
+                    <div class="color-group">
+                        <input type="color" id="qr-bg" value="#ffffff">
+                         <div class="color-input-container">
+                            <input type="text" id="qr-bg-hex" value="#FFFFFF" maxlength="7">
+                        </div>
+                    </div>
+                    <div class="control-group" style="margin-top: 10px;">
+                        <label style="display: flex; align-items: center; cursor: pointer; margin-top: 5px;">
+                            <input type="checkbox" id="transparent-bg-checkbox">
+                            Fondo **Transparente** (Solo PNG/SVG)
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
+
+        </div>
+        
+        <div class="tab-content" id="quality-frame">
+            <fieldset class="control-section">
+                <legend>Marco Decorativo</legend>
+                <input type="hidden" id="qr-frame" value="frame-rounded">
+                <div class="style-options" id="frame-style-options"></div>
+            </fieldset>
+            
+            <fieldset class="control-section">
+                <legend>Descarga y Calidad</legend>
+                
+                <div class="control-group">
+                    <label for="download-format">Formato de Archivo:</label>
+                    <select id="download-format">
+                        <option value="png" selected>PNG (Alta Calidad)</option>
+                        <option value="svg">SVG (Vectorial - Ideal para impresión)</option>
+                        <option value="jpeg">JPEG (Comprimido)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="download-size">Tamaño (Resolución de píxeles): <span id="size-display" style="font-weight: 700; color: var(--primary-color);">2048px</span></label>
+                    <input type="range" id="download-size" min="512" max="4096" step="512" value="2048">
+                </div>
+
+            </fieldset>
+        </div>
+    </div>
+    
+    <div class="preview-area">
+        <div id="qr-preview">
+            <div class="qr-frame-container"></div>
+        </div>
+        
+        <p id="validation-error-message" style="color: var(--danger-color); text-align: center; font-weight: 600; display: none;"></p>
+
+        <button id="download-btn" onclick="descargarQR()"> <i class="fas fa-download"></i> DESCARGAR QR</button>
+    </div>
+</div>
+
+<footer class="main-footer">
+    <p>
+         Creada por <span class="creator-name">Jean Pierre Leniz</span>
+    </p>
+    <p class="copyright">&copy; 2025 QR Generator Project. Todos los derechos reservados.</p>
+</footer>
+
+<script>
+// ====================================================================
+// 0. DEFINICIÓN DE OPCIONES PARA MOCKUPS (IGUAL)
+// ====================================================================
+const dotOptions = [
+    { value: 'square', label: 'Cuadrado' },
+    { value: 'dots', label: 'Puntos' },
+    { value: 'rounded', label: 'Redondeado' },
+    { value: 'classy', label: 'Elegante' },
+    { value: 'classy-rounded', label: 'Clásico Red.' },
+    { value: 'extra-rounded', label: 'Extra Red.' },
+];
+
+const eyeSquareOptions = [
+    { value: 'square', label: 'Cuadrado' },
+    { value: 'extra-rounded', label: 'Extra Redondeado' },
+    { value: 'dot', label: 'Círculo' },
+    { value: 'classy', label: 'Elegante' },
+];
+
+const eyeDotOptions = [
+    { value: 'square', label: 'Cuadrado' },
+    { value: 'dots', label: 'Punto' },
+    { value: 'rounded', label: 'Redondeado' },
+    { value: 'classy', label: 'Elegante' },
+    { value: 'classy-rounded', label: 'Clásico Red.' },
+    { value: 'extra-rounded', label: 'Extra Red.' },
+];
+
+const frameOptions = [
+    { value: 'frame-none', label: 'Sin Marco' },
+    { value: 'frame-basic', label: 'Básico Negro' },
+    { value: 'frame-rounded', label: 'Redondeado Rojo' },
+    { value: 'frame-dotted', label: 'Punteado Rojo' },
+    { value: 'frame-dashed-black', label: 'Rayas Negro' },
+    { value: 'frame-double-red', label: 'Doble Rojo' },
+];
+
+
+// ====================================================================
+// 1. Inicialización y Referencias (ACTUALIZADO)
+// ====================================================================
+const qrFrameContainer = document.querySelector('.qr-frame-container');
+const qrPreview = document.getElementById('qr-preview'); 
+
+// Referencias para el Slider de Tamaño
+const downloadSizeSlider = document.getElementById("download-size");
+const sizeDisplay = document.getElementById("size-display"); 
+
+// Referencias para Contenido
+const contentTypeSelect = document.getElementById("content-type");
+const contentGroups = {
+    url: document.getElementById("content-url"),
+    wifi: document.getElementById("content-wifi"),
+    vcard: document.getElementById("content-vcard")
+};
+
+// Referencias de Logo
+const fileInput = document.getElementById("qr-logo");
+const fileNameDisplay = document.getElementById("file-name-display");
+
+// Referencias para Sincronización de Color/Hex
+const qrColorInput = document.getElementById("qr-color");
+const qrColorHexInput = document.getElementById("qr-color-hex");
+const qrBgInput = document.getElementById("qr-bg");
+const qrBgHexInput = document.getElementById("qr-bg-hex");
+const qrEyesSquareColorInput = document.getElementById("qr-eyes-square-color"); 
+const qrEyesSquareColorHexInput = document.getElementById("qr-eyes-square-color-hex"); 
+const qrEyesDotColorInput = document.getElementById("qr-eyes-dot-color"); 
+const qrEyesDotColorHexInput = document.getElementById("qr-eyes-dot-color-hex"); 
+const transparentBgCheckbox = document.getElementById("transparent-bg-checkbox"); 
+
+// Referencias para el Gradiente
+const gradientDotsCheckbox = document.getElementById("gradient-dots-checkbox");
+const gradientTypeSelect = document.getElementById("gradient-type");
+const gradientTypeGroup = document.getElementById("gradient-type-group"); 
+const qrColorLabel = document.getElementById("qr-color-label"); 
+const qrColorEndInput = document.getElementById("qr-color-end");
+const qrColorEndHexInput = document.getElementById("qr-color-end-hex");
+const qrColorEndGroup = document.getElementById("qr-color-end-group"); 
+
+
+// Referencias de Estilos Ocultos 
+const qrShapeInput = document.getElementById("qr-shape");
+const qrEyesSquareInput = document.getElementById("qr-eyes-square");
+const qrEyesDotInput = document.getElementById("qr-eyes-dot");
+const qrFrameInput = document.getElementById("qr-frame"); 
+
+
+// REFERENCIAS DE COLORES INICIALES (antes de cargar settings)
+// OJO: Estas son las variables iniciales, los valores del input se actualizan al cargar settings
+const initialQrColor = qrColorInput.value;
+const initialQrColorEnd = qrColorEndInput.value; 
+const initialQrEyeSquareColor = qrEyesSquareColorInput.value; 
+const initialQrEyeDotColor = qrEyesDotColorInput.value; 
+const initialBgColor = qrBgInput.value;
+
+// Obtenemos los valores iniciales de estilo
+const defaultData = document.getElementById("qr-text").value;
+const defaultShape = qrShapeInput.value;
+const defaultEyesSquare = qrEyesSquareInput.value;
+const defaultEyesDot = qrEyesDotInput.value;
+
+// Referencia al mensaje de error
+const validationMessage = document.getElementById('validation-error-message');
+
+
+let qr = new QRCodeStyling({
+    width: 300, 
+    height: 300, 
+    data: defaultData, 
+    image: "",
+    dotsOptions: { 
+        color: initialQrColor, 
+        type: defaultShape
+    },
+    backgroundOptions: { 
+        color: initialBgColor
+    },
+    cornersSquareOptions: { 
+        color: initialQrEyeSquareColor, 
+        type: defaultEyesSquare
+    },
+    cornersDotOptions: { 
+        color: initialQrEyeDotColor, 
+        type: defaultEyesDot
+    },
+    imageOptions: {
+        crossOrigin: "anonymous", 
+        margin: 10
+    }
+});
+
+// Añadir el QR al contenedor (Mantiene la previsualización)
+qr.append(qrFrameContainer);
+
+// ====================================================================
+// 1.1 LÓGICA DE PESTAÑAS (IGUAL)
+// ====================================================================
+
+function setupTabs() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetTab = button.getAttribute('data-tab');
+
+            // Quitar clase activa de botones
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            // Ocultar contenidos
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Activar el botón y el contenido correspondiente
+            button.classList.add('active');
+            document.getElementById(targetTab).classList.add('active');
+        });
+    });
+}
+
+
+// ====================================================================
+// 2. LÓGICA DE MOCKUPS (IGUAL)
+// ====================================================================
+function createMockupElement(type, value, label) {
+    let mockupHTML = '';
+    let containerClass = 'style-mockup';
+
+    if (type === 'dots') {
+        containerClass += ` dots-mockup ${value}`;
+        mockupHTML = `
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        `;
+    } else if (type === 'eyes-square' || type === 'eyes-dot') {
+        // Usamos el valor del input oculto del otro ojo para el mockup
+        const squareType = type === 'eyes-square' ? value : qrEyesSquareInput.value;
+        const dotType = type === 'eyes-dot' ? value : qrEyesDotInput.value;
+        containerClass = `eye-mockup ${squareType} ${dotType}`;
+        mockupHTML = `
+            <div class="eye-square">
+                <div class="eye-dot"></div>
+            </div>
+        `;
+    } else if (type === 'frame') {
+        containerClass = `frame-mockup ${value}`;
+        mockupHTML = `<div class="qr-small-representation"></div>`;
+    }
+
+    return `
+        <div class="style-option-item" data-type="${type}" data-value="${value}">
+            <div class="${containerClass}">${mockupHTML}</div>
+            <span class="style-mockup-label">${label}</span>
+        </div>
+    `;
+}
+
+function renderMockups(options, containerId, inputElement, type) {
+    const container = document.getElementById(containerId);
+    let html = '';
+    
+    options.forEach(option => {
+        html += createMockupElement(type, option.value, option.label);
+    });
+    
+    container.innerHTML = html;
+    
+    // Asignar listeners a los elementos de mockup
+    container.querySelectorAll('.style-option-item').forEach(item => {
+        item.addEventListener('click', () => {
+            // 1. Limpiar selección y establecer la nueva
+            container.querySelectorAll('.style-option-item').forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+            
+            // 2. Actualizar el input oculto y el QR
+            inputElement.value = item.getAttribute('data-value');
+            
+            // Si cambian los tipos de ojo, re-renderizar los mockups de ojo para reflejar el cambio en el otro
+            if (type === 'eyes-square' || type === 'eyes-dot') {
+                 renderMockups(eyeSquareOptions, 'eyes-square-style-options', qrEyesSquareInput, 'eyes-square');
+                 renderMockups(eyeDotOptions, 'eyes-dot-style-options', qrEyesDotInput, 'eyes-dot');
+            }
+            
+            updateQR();
+            saveSettings();
+        });
+    });
+    
+    // 3. Establecer el valor seleccionado al cargar
+    container.querySelector(`[data-value="${inputElement.value}"]`)?.classList.add('selected');
+}
+
+// ====================================================================
+// 3. Función para CONSTRUIR el contenido del QR (Payload) Y VALIDACIÓN (REVISADO)
+// ====================================================================
+function buildData() {
+    const type = contentTypeSelect.value;
+        let data = "";
+        let error = "";
+        
+        // Función para escapar caracteres que rompen el formato QR (e.g., ; , \)
+        const sanitize = (str) => str.replace(/([;\\,])/g, '\\$1');
+        const trim = (str) => str.trim();
+
+        switch (type) {
+            case 'wifi':
+                const ssid = trim(document.getElementById("wifi-ssid").value);
+                const pass = trim(document.getElementById("wifi-password").value);
+                const enc = document.getElementById("wifi-type").value;
+                
+                if (!ssid) {
+                    error = "El Nombre de la Red (SSID) no puede estar vacío.";
+                } else if (enc !== 'nopass' && pass.length > 0 && pass.length < 8) {
+                    error = "La contraseña de Wi-Fi debe tener al menos 8 caracteres (o selecciona Sin Contraseña).";
+                } else if (enc === 'nopass' || pass.length === 0) {
+                    // QR: WIFI:T:nopass;S:SSID;;
+                    data = `WIFI:T:nopass;S:${sanitize(ssid)};;`;
+                } else {
+                    // QR: WIFI:T:WPA;S:SSID;P:PASSWORD;;
+                    data = `WIFI:T:${enc};S:${sanitize(ssid)};P:${sanitize(pass)};;`; 
+                }
+                break;
+                
+            case 'vcard':
+                const name = trim(document.getElementById("vcard-name").value);
+                const phone = trim(document.getElementById("vcard-phone").value);
+                const email = trim(document.getElementById("vcard-email").value);
+                
+                if (!name && !phone && !email) {
+                    error = "Debes ingresar al menos el Nombre, el Teléfono o el Email para un vCard.";
+                } else {
+                    // Formato vCard 3.0 simplificado
+                    data = `BEGIN:VCARD\nVERSION:3.0\nN:${sanitize(name)};;;;\nFN:${sanitize(name)}\nTEL:${sanitize(phone)}\nEMAIL:${sanitize(email)}\nEND:VCARD`;
+                }
+                break;
+                
+            case 'url':
+            default:
+                let url = trim(document.getElementById("qr-text").value);
+                if (!url) {
+                    error = "El campo de Contenido (URL o Texto) no puede estar vacío.";
+                } else {
+                    // Intenta agregar https:// si parece una URL sin protocolo
+                    if (url.indexOf('://') === -1 && url.indexOf('.') !== -1 && url.length > 3) {
+                         url = 'https://' + url;
+                    }
+                    data = url;
+                }
+                break;
+        }
+        
+        return { data: data, error: error };
+}
+
+
+// ====================================================================
+// 4. Función principal de actualización del QR (MEJORADO)
+// ====================================================================
+function updateQR() {
+    const result = buildData(); 
+    const downloadBtn = document.getElementById("download-btn");
+
+    // 1. Manejo del Error
+    if (result.error) {
+        validationMessage.textContent = result.error;
+        validationMessage.style.display = 'block';
+        qrPreview.style.opacity = 0.5; // Oscurecer o reducir opacidad del QR
+        downloadBtn.disabled = true;
+        downloadBtn.style.opacity = 0.6;
+        return; 
+    } 
+
+    // 2. Si es válido
+    validationMessage.style.display = 'none';
+    qrPreview.style.opacity = 1; 
+    downloadBtn.disabled = false;
+    downloadBtn.style.opacity = 1;
+
+    // --- Colores y Gradiente ---
+    const colorStart = qrColorInput.value;
+    const colorEnd = qrColorEndInput.value;
+    const eyeSquareColor = qrEyesSquareColorInput.value; 
+    const eyeDotColor = qrEyesDotColorInput.value; 
+    
+    let dotsColorOption;
+    const isGradientActive = gradientDotsCheckbox.checked;
+
+    if (isGradientActive) {
+        // Lógica de Gradiente
+        const gradientType = gradientTypeSelect.value;
+        dotsColorOption = {
+            type: gradientType,
+            color: colorStart,
+            colorEnd: colorEnd,
+            rotation: 0 
+        };
+        
+        // Lógica visual del Gradiente
+        qrColorEndGroup.style.display = 'block';
+        gradientTypeGroup.style.display = 'block';
+        qrColorLabel.textContent = "Color de Puntos (Inicio):";
+        
+    } else {
+        // Lógica de Color Simple
+        dotsColorOption = colorStart; 
+        
+        // Lógica visual de Color Simple
+        qrColorEndGroup.style.display = 'none';
+        gradientTypeGroup.style.display = 'none';
+        qrColorLabel.textContent = "Color de Puntos:";
+    }
+    
+    // --- Manejo de Fondo Transparente ---
+    const bg = transparentBgCheckbox.checked ? "transparent" : qrBgInput.value; 
+    
+    // Lógica visual: deshabilitar/habilitar inputs de color de fondo
+    const colorGroupContainer = qrBgInput.closest('#color-section'); // Seleccionar el fieldset de color
+    if (transparentBgCheckbox.checked) {
+        if(colorGroupContainer) { 
+             colorGroupContainer.classList.add('transparent-active');
+        }
+    } else {
+        if(colorGroupContainer) {
+            colorGroupContainer.classList.remove('transparent-active');
+        }
+    }
+
+    // Estilos
+    const shape = qrShapeInput.value;
+    const eyesSquare = qrEyesSquareInput.value;
+    const eyesDot = qrEyesDotInput.value;
+    const frameClass = qrFrameInput.value;
+    
+    // --- HACK CSS: Aplicar el color de los ojos al contenedor ---
+    qrFrameContainer.style.setProperty('--eye-square-color', eyeSquareColor);
+    qrFrameContainer.style.setProperty('--eye-dot-color', eyeDotColor);
+
+    qr.update({
+        data: result.data, 
+        dotsOptions: { color: dotsColorOption, type: shape },
+        backgroundOptions: { color: bg },
+        
+        // Ojo Cuadrado: Solo necesitamos el color y el tipo (el CSS simula el tipo visualmente)
+        cornersSquareOptions: { color: eyeSquareColor, type: eyesSquare }, 
+        
+        // Ojo Punto: Necesitamos el color y el tipo.
+        cornersDotOptions: { color: eyeDotColor, type: eyesDot } 
+    });
+    
+    // Aplicar clase de marco
+    qrFrameContainer.className = `qr-frame-container ${frameClass} eye-square-shape-${eyesSquare}`;
+    
+    // Si hay logo cargado, re-aplicarlo (el update anterior lo borra)
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+            qr.update({
+                image: reader.result,
+                imageOptions: {
+                    crossOrigin: "anonymous",
+                    margin: 10,
+                    hideBackgroundDots: true
+                }
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// 5. Función para alternar la visualización de los campos (REVISADO - switchContent)
+function switchContent() {
+    const type = contentTypeSelect.value;
+    
+    // Asegurarse de que solo el grupo de contenido seleccionado esté visible
+    for (const key in contentGroups) {
+        if (contentGroups[key]) {
+            if (key === type) {
+                contentGroups[key].style.display = 'block';
+            } else {
+                contentGroups[key].style.display = 'none';
+            }
+        }
+    }
+    updateQR(); 
+    saveSettings(); // Guardar el tipo de contenido seleccionado
+}
+
+// 6. Manejo de Logo (IGUAL)
+function handleLogoUpload() {
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        
+        fileNameDisplay.textContent = file.name;
+        
+        reader.onload = () => {
+             if (qrPreview.style.opacity > 0) { 
+                qr.update({
+                    image: reader.result,
+                    imageOptions: {
+                        crossOrigin: "anonymous",
+                        margin: 10,
+                        hideBackgroundDots: true
+                    }
+                });
+             }
+        };
+        
+        reader.readAsDataURL(file);
+    } else {
+        removeLogo();
+    }
+    saveSettings();
+}
+
+function removeLogo() {
+    fileInput.value = null; 
+    fileNameDisplay.textContent = "Ningún archivo seleccionado."; 
+    
+    if (qrPreview.style.opacity > 0) { 
+        qr.update({ 
+            image: "",
+            imageOptions: { margin: 10, hideBackgroundDots: false } 
+        });
+    }
+    saveSettings();
+}
+
+// 7. Función de descarga (IGUAL)
+function descargarQR() {
+    if (document.getElementById("download-btn").disabled) {
+        return;
+    }
+
+    const format = document.getElementById("download-format").value;
+    const size = parseInt(document.getElementById("download-size").value);
+    const originalText = document.getElementById("download-btn").innerHTML;
+    const btn = document.getElementById("download-btn");
+
+    btn.innerHTML = '<i class="fas fa-check-circle"></i> ¡DESCARGADO!';
+    btn.style.backgroundColor = '#28a745'; 
+
+    qr.download({ 
+        name: "qr-code-erreip-pro", 
+        extension: format,
+        width: size, 
+        height: size 
+    });
+    
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.style.backgroundColor = 'var(--primary-color)';
+    }, 3000);
+}
+
+// 8. Sincronizar color y texto HEX (IGUAL)
+const formatHex = (hex) => hex.toUpperCase().replace(/[^0-9A-F#]/g, '');
+
+function handleColorChange(colorPicker, hexInput) {
+    hexInput.value = formatHex(colorPicker.value);
+    updateQR();
+    saveSettings(); 
+}
+
+function handleHexChange(colorPicker, hexInput) {
+    let hex = formatHex(hexInput.value);
+    // Asegurarse de que el valor sea un color HEX válido para asignarlo al colorPicker
+    if (/^#[0-9A-F]{3}([0-9A-F]{3})?$/i.test(hex)) {
+        colorPicker.value = hex;
+        updateQR();
+        saveSettings(); 
+    }
+    hexInput.value = hex;
+}
+
+
+// ====================================================================
+// 9. Persistencia de Datos con LocalStorage (REVISADO)
+// ====================================================================
+
+// Lista de IDs de elementos a guardar
+const storageKeys = [
+    'content-type', 'qr-text', 'wifi-ssid', 'wifi-password', 'wifi-type',
+    'vcard-name', 'vcard-phone', 'vcard-email', 
+    'qr-color', 'qr-eyes-square-color', 'qr-eyes-dot-color', 'qr-bg', 
+    'qr-color-end', // Añadido
+    'gradient-type', // Añadido
+    'qr-shape', 'qr-eyes-square', 'qr-eyes-dot', 'qr-frame', 
+    'download-format', 'download-size'
+];
+
+function saveSettings() {
+    storageKeys.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            let value;
+            if (element.type === 'checkbox') {
+                value = element.checked;
+            } else {
+                value = element.value;
+            }
+            localStorage.setItem(id, value);
+        }
+    });
+    // Guardado de checkbox separados
+    localStorage.setItem('gradient-dots-checkbox', gradientDotsCheckbox.checked);
+    localStorage.setItem('transparent-bg-checkbox', transparentBgCheckbox.checked);
+
+    // Guardado de valores HEX
+    localStorage.setItem('qr-color-hex', qrColorHexInput.value);
+    localStorage.setItem('qr-eyes-square-color-hex', qrEyesSquareColorHexInput.value);
+    localStorage.setItem('qr-eyes-dot-color-hex', qrEyesDotColorHexInput.value);
+    localStorage.setItem('qr-bg-hex', qrBgHexInput.value);
+    localStorage.setItem('qr-color-end-hex', qrColorEndHexInput.value);
+}
+
+function loadSettings() {
+    storageKeys.forEach(id => {
+        const value = localStorage.getItem(id);
+        const element = document.getElementById(id);
+        
+        if (value !== null && element) {
+            if (element.type === 'checkbox') {
+                 // Corregir la carga de booleanos para checkbox
+                element.checked = (value === 'true');
+            } else {
+                element.value = value;
+            }
+        }
+    });
+    
+    // Cargar valores HEX y sincronizar color pickers
+    if (localStorage.getItem('qr-color-hex')) {
+        qrColorHexInput.value = localStorage.getItem('qr-color-hex');
+        qrColorInput.value = qrColorHexInput.value;
+    }
+    if (localStorage.getItem('qr-eyes-square-color-hex')) {
+        qrEyesSquareColorHexInput.value = localStorage.getItem('qr-eyes-square-color-hex');
+        qrEyesSquareColorInput.value = qrEyesSquareColorHexInput.value;
+    }
+    if (localStorage.getItem('qr-eyes-dot-color-hex')) {
+        qrEyesDotColorHexInput.value = localStorage.getItem('qr-eyes-dot-color-hex');
+        qrEyesDotColorInput.value = qrEyesDotColorHexInput.value;
+    }
+    if (localStorage.getItem('qr-bg-hex')) {
+        qrBgHexInput.value = localStorage.getItem('qr-bg-hex');
+        qrBgInput.value = qrBgHexInput.value;
+    }
+    if (localStorage.getItem('qr-color-end-hex')) {
+        qrColorEndHexInput.value = localStorage.getItem('qr-color-end-hex');
+        qrColorEndInput.value = qrColorEndHexInput.value;
+    }
+    
+    // Forzar actualización del display del slider
+    sizeDisplay.textContent = downloadSizeSlider.value + 'px';
+}
+
+// ====================================================================
+// 10. Event Listeners (REVISADO)
+// ====================================================================
+
+function addListeners(ids, eventType) {
+    ids.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener(eventType, () => {
+                // Si el evento es en el selector de tipo de contenido, solo llama a switchContent
+                if (id === 'content-type') {
+                    switchContent();
+                } else {
+                    updateQR(); 
+                }
+                saveSettings(); 
+            });
+        }
+    });
+}
+
+const inputChangeElements = [
+    // Contenido
+    'content-type', 'qr-text', 'wifi-ssid', 'wifi-password', 'wifi-type', 
+    'vcard-name', 'vcard-phone', 'vcard-email', 
+    
+    // Colores/Fondo (Checkboxes y Select)
+    'transparent-bg-checkbox', 'gradient-dots-checkbox', 'gradient-type',
+    
+    // Descarga (solo guardado)
+    'download-format' 
+];
+
+// Asignar listeners a input y change para la mayoría de elementos
+addListeners(inputChangeElements, 'input'); 
+addListeners(inputChangeElements, 'change'); 
+
+// Listeners específicos para colores (manteniendo la lógica HEX sync)
+qrColorInput.addEventListener('input', () => handleColorChange(qrColorInput, qrColorHexInput));
+qrColorHexInput.addEventListener('input', () => handleHexChange(qrColorInput, qrColorHexInput));
+qrColorEndInput.addEventListener('input', () => handleColorChange(qrColorEndInput, qrColorEndHexInput)); 
+qrColorEndHexInput.addEventListener('input', () => handleHexChange(qrColorEndInput, qrColorEndHexInput));
+qrEyesSquareColorInput.addEventListener('input', () => handleColorChange(qrEyesSquareColorInput, qrEyesSquareColorHexInput)); 
+qrEyesSquareColorHexInput.addEventListener('input', () => handleHexChange(qrEyesSquareColorInput, qrEyesSquareColorHexInput)); 
+qrEyesDotColorInput.addEventListener('input', () => handleColorChange(qrEyesDotColorInput, qrEyesDotColorHexInput)); 
+qrEyesDotColorHexInput.addEventListener('input', () => handleHexChange(qrEyesDotColorInput, qrEyesDotColorHexInput)); 
+qrBgInput.addEventListener('input', () => handleColorChange(qrBgInput, qrBgHexInput));
+qrBgHexInput.addEventListener('input', () => handleHexChange(qrBgInput, qrBgHexInput));
+
+// Logo
+fileInput.addEventListener("change", handleLogoUpload);
+document.getElementById("remove-logo-btn").addEventListener("click", removeLogo);
+    
+// Slider de Tamaño
+downloadSizeSlider.addEventListener("input", function() {
+    sizeDisplay.textContent = this.value + 'px';
+    saveSettings(); 
+});
+
+
+// ====================================================================
+// 11. Inicialización (Llamada final)
+// ====================================================================
+
+window.onload = function() {
+    // 1. Cargar ajustes de LocalStorage
+    loadSettings(); 
+    
+    // 2. Setup Tabs
+    setupTabs();
+    
+    // 3. Inicializar el QR (switchContent llama a updateQR)
+    // Esto debe ocurrir ANTES de renderizar mockups para que los inputs ocultos tengan el valor cargado.
+    switchContent(); 
+    
+    // 4. Renderizar Mockups y aplicar listeners (debe hacerse después de loadSettings)
+    renderMockups(dotOptions, 'dots-style-options', qrShapeInput, 'dots');
+    renderMockups(eyeSquareOptions, 'eyes-square-style-options', qrEyesSquareInput, 'eyes-square');
+    renderMockups(eyeDotOptions, 'eyes-dot-style-options', qrEyesDotInput, 'eyes-dot');
+    renderMockups(frameOptions, 'frame-style-options', qrFrameInput, 'frame');
+};
+</script>
+
+</body>
+</html>
